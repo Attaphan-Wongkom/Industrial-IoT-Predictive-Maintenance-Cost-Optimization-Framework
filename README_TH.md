@@ -40,6 +40,7 @@ Predictive maintenance NASA Data/
 |-- streamlit_app.py                             # Streamlit Web App อินเตอร์แอกทีฟ: ปรับค่าเซนเซอร์→ดู RUL/Cost/SHAP สด
 |-- requirements.txt                             # รายการไลบรารี Python ที่จำเป็นทุกอย่างในโครงการนี้
 |-- README.md / README_TH.md                     # เอกสารต้นฉบับภาษาอังกฤษ/ภาษาไทย
+|-- CHANGELOG.md /                               # เอกสารรายละเอียดการปรับปรุงแก้ไข
 |
 |-- artifacts/                                   # Directory เก็บไฟล์ .joblib/.json ผลลัพธ์โมเดล (export จาก notebook)
 |   |-- rul_regressor.joblib                     # RandomForest RUL model (145 features engineered)
