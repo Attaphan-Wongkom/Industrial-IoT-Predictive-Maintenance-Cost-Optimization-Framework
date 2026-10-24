@@ -1,0 +1,14 @@
+# app.yaml — NASA RUL Predictor (Streamlit)
+# Docs: https://docs.databricks.com/aws/en/dev-tools/databricks-apps/app-runtime/
+command:
+  - streamlit
+  - run
+  - streamlit_app.py
+
+env:
+  - name: STREAMLIT_SERVER_HEADLESS
+    value: 'true'
+  - name: STREAMLIT_SERVER_ADDRESS
+    value: 0.0.0.0
+  - name: STREAMLIT_GATHER_USAGE_STATS
+    value: 'false'

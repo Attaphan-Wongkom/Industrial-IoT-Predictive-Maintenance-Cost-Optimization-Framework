@@ -1,0 +1,36 @@
+[23/10/2026]
+- วิเคราะห์และออกแบบฟีเจอร์ weather stress และ cumulative weather stress สำหรับ NASA C-MAPSS predictive maintenance
+- ตรวจสอบ correlation ระหว่าง weather, sensor, และ RUL พบว่า weather ไม่มีผลต่อ degradation ใน C-MAPSS แต่มีความสำคัญด้าน business (downtime, maintenance duration)
+- สร้าง synthetic timeline พร้อม commissioning ตาม scenario จริง
+- ดึง real weather data (NASA POWER API) มารวมใน pipeline
+- ออกแบบและเพิ่ม stress indices ใหม่: accumulated_high_temp_cycles, rolling_std_temp_15, weather_stress_score, cumulative_weather_stress, rolling_stress_15
+- ชี้แจงและ document ว่า weather ใช้เป็น feature สำหรับ estimation downtime/cost/business ไม่ใช่ RUL prediction
+- เตรียมฟีเจอร์และ pipeline สำหรับขั้นต่อไป: calendar feature, cost parameter, model training
+
+[24/10/2026]
+- Streamlit app deploy สำเร็จ (nasa-rul-predictor)
+- เพิ่มฟีเจอร์ครบ: ปรับ operating conditions/sensors, ทำนาย RUL, SHAP explainability, sensitivity analysis, cost scenario
+- Refactor path/relative artifact, รองรับ deploy app ได้ทั้งใน workspace และ App sandbox
+- อัพเดต requirements.txt ให้ครบ (streamlit, shap, joblib, scikit-learn, pandas)
+- บีบอัด shap_explainer_raw.joblib แบบ compressed ลดขนาดไฟล์
+- Document การแก้ไข path และ artifact ให้สอดคล้อง deployment
+- Medallion pipeline, ML artifacts, cost_model.py, rul_model.py ใช้งานร่วมกับ app ได้
+- โค้ด streamlit_app.py รองรับ path relative + absolute ทำให้ไม่มี error '__file__' หรือ 404
+- ปรับ/ลบปุ่ม preset (Healthy/Degraded/Critical): preset แบบ simple ใช้ min/mean/max/p25/p75 ของ sensor → ผลลัพธ์อาจหา RUL ไม่สมจริง เพราะ sensor สำคัญบางอันเพิ่มขึ้น RUL เพิ่ม บางอันลดลง RUL กลับเพิ่ม จาก sensitivity & SHAP พบว่าไม่มี preset เดียวตอบโจทย์ทุก case จึงลบออก หันไปใช้แค่ slider manual + อธิบาย impact พร้อม mapping sensor ใน UI
+- ทดลองเปลี่ยนแนวทางโดยโมเดลพยากรณ์ downtime hours เป็น target ผ่าน regression/classification ที่ใช้ features sensor + calendar + stress
+- สร้าง synthetic target actual_downtime_hours (Cell 34) โดยใช้ randomized penalty logic ส่งผลให้ feature-target mapping อ่อน/มี noise
+- ทำ regression (Cell 36) ด้วย random forest/lightgbm พบว่า MAE ~3.6hr, R²~0.3 (prediction ต่ำ, feature importance calendar เด่น, sensor/rolling stress มีผลต่ำ)
+- เปลี่ยนเป็น interval classification (Cell 38), multi-class: Short/Medium/Long, accuracy ~84%, กลุ่ม Long ยังทำนายไม่ดี (class imbalance)
+- ใช้ flexible action mapping (Cell 43): คำนวณ downtime จาก regression แล้ว assign action โดย threshold, เห็นว่าปรับ threshold มีผลมากกว่าตัวโมเดล
+- ทดสอบ two-stage classification (Cell 44): แยก Quick Turn ก่อน, แล้วค่อยแบ่ง Planned vs Major บนที่เหลือ, พบว่า recall กลุ่ม Major ดีขึ้นมาก แต่ trade-off แยก Planned ได้ไม่ดี
+- สรุปได้ว่าการพยากรณ์ downtime/cost โดยตรงไม่เหมาะ สมกับ structure ของข้อมูล/feature mapping และมี noise สูง
+- ตัดสินใจเปลี่ยนแนว pipeline ไปใช้ RUL (Remaining Useful Life) prediction แบบ C-MAPSS แทนพยากรณ์ downtime / action ด้วย Rule-based mapping
+- Pipeline ใหม่ประกอบด้วย: [Feature Engineering] → [RUL Prediction: ML] → [Post-Processing: action, downtime mapping] → [Cost Optimization]
+- Document lessons learned: การสร้าง target downtime/cost synthetic อิง rule/random ทำให้ model ไม่สามารถ map feature กับ business impact ได้ดี ต้องกลับไปเน้น RUL prediction เพื่อเชื่อมโยงกับ health state แบบอ้างอิงในงานหลัก
+- สร้าง app.yaml สำหรับ Databricks Apps (command: streamlit run streamlit_app.py, headless, bind 0.0.0.0)
+- แก้เออเร่อ FileNotFoundError: shap_explainer_raw.joblib ไม่พบใน artifacts/ ตอน deploy app → แก้โดยจัดชื่อไฟล์ให้ตรงกับที่โค้ดโหลด (shap_explainer_raw_compressed.joblib)
+- แก้เออเร่อ StreamlitAPIException: set_page_config() can only be called once per app page → เกิดจากเรียก load_artifacts() (@st.cache_resource) ก่อน st.set_page_config() วิธีแก้คือย้าย st.set_page_config() ขึ้นไปไว้หลัง import ทันที ก่อนคำสั่ง Streamlit อื่นทั้งหมด (ลบ %pip install บนหัวไฟล์ออกด้วย เพราะเป็น notebook magic ใช้ใน Streamlit ไม่ได้)
+- ลำดับ deployment ที่ถูกต้อง: apps get → apps start (ถ้า STOPPED) → apps deploy (จาก default_source_code_path เดิม)
+- หมายเหตุ: warning scikit-learn version mismatch (train ด้วย 1.7.2, app ติดตั้ง 1.9.1) — ยังรันได้ แต่ค่าทำนายอาจคลาดเคลื่อน ควร pin scikit-learn==1.7.2 ใน requirements.txt ภายหลัง
+- Pin scikit-learn==1.7.2 ใน requirements.txt ให้ตรงกับเวอร์ชัน train แล้ว deploy ใหม่ → หายจาก InconsistentVersionWarning (deployment 01f1cf9b758a127c8e9c2cbe135a671d)
+- แก้ FutureWarning: pandas Styler.applymap deprecated → เปลี่ยนเป็น Styler.map ที่ streamlit_app.py:362 (sensitivity table) แล้ว deploy ใหม่
