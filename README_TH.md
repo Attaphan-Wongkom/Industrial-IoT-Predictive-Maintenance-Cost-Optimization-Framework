@@ -256,5 +256,29 @@ result = estimator.estimate_single(rul=45, health_state='Degraded (Medium Risk)'
 - Productionize เป็น REST API/Batch scoring 
 - Connect ML pipeline กับ real-world MRO log
 
+## 🌟 ฟีเจอร์เด่นของ Web Application (Streamlit)
+
+แอปพลิเคชันนี้ออกแบบมาให้วิศวกรหรือผู้บริหารสามารถทดลองปรับค่าพารามิเตอร์ (What-If Analysis) และดูผลกระทบที่อาจเกิดขึ้น โดยมีฟีเจอร์ที่สำคัญดังนี้:
+<p align="center">
+  <img src="images/Screen2_RUL_SHAP_Waterfall.png" width="850" alt="SHAP Waterfall Plot">
+  <br><b>1. Model Explainability (SHAP Waterfall Plot)</b><br>
+  <i>อธิบายเหตุผลเบื้องหลังการทำนายของโมเดล ว่าเซนเซอร์ตัวใดกำลังดึงอายุการใช้งาน (RUL) ให้เพิ่มขึ้นหรือลดลง ทำให้โมเดลไม่ใช่ Black box อีกต่อไป</i>
+</p>
+
+<br>
+
+<p align="center">
+  <img src="images/Screen3_RUL_SensitivityAnalysis.png" width="850" alt="Sensitivity Analysis">
+  <br><b>2. Sensitivity Analysis</b><br>
+  <i>ตารางวิเคราะห์ความไว จำลองสถานการณ์ว่าหากเซนเซอร์แต่ละตัวมีค่าเปลี่ยนไป 1 Standard Deviation จะส่งผลกระทบต่อ RUL กี่ Cycle (ไฮไลท์ แดง/เขียว ให้อ่านง่าย)</i>
+</p>
+
+<br>
+
+<p align="center">
+  <img src="images/creen4_RUL_FeatureImportance.png" width="850" alt="Global Feature Importance">
+  <br><b>3. Global Feature Importance & Insights</b><br>
+  <i>สรุปความสำคัญของตัวแปรในภาพรวม พร้อมระบบสรุปข้อความ (Text Summary) แนะนำฟีเจอร์ที่ควรเฝ้าระวังเพื่อยืดอายุการใช้งานเครื่องยนต์</i>
+</p>
 ## Reference
 - NASA C-MAPSS Dataset: https://ti.arc.nasa.gov/tech/dash/groups/pcoe/prognostic-data-repository/
