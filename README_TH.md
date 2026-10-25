@@ -259,6 +259,15 @@ result = estimator.estimate_single(rul=45, health_state='Degraded (Medium Risk)'
 ## 🌟 ฟีเจอร์เด่นของ Web Application (Streamlit)
 
 แอปพลิเคชันนี้ออกแบบมาให้วิศวกรหรือผู้บริหารสามารถทดลองปรับค่าพารามิเตอร์ (What-If Analysis) และดูผลกระทบที่อาจเกิดขึ้น โดยมีฟีเจอร์ที่สำคัญดังนี้:
+
+<p align="center">
+  <img src="images/Screen1_RUL_Dashboard.png" width="850" alt="Main Dashboard & Cost Estimation">
+  <br><b>1. Real-time RUL & Cost Estimation (แดชบอร์ดหลัก)</b><br>
+  <i>ทำนายอายุการใช้งานที่เหลืออยู่ (RUL), สถานะความเสี่ยง และแปลงเป็น "ต้นทุนการซ่อมบำรุง" ทันที โดยรองรับการจำลองสถานการณ์ตามเงื่อนไขธุรกิจ เช่น วันหยุด (Holiday) หรือช่วง Peak Season</i>
+</p>
+
+<br>
+
 <p align="center">
   <img src="images/Screen2_RUL_SHAP_Waterfall.png" width="850" alt="SHAP Waterfall Plot">
   <br><b>1. Model Explainability (SHAP Waterfall Plot)</b><br>
